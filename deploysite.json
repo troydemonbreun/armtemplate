@@ -2,17 +2,11 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "siteName": {
-            "type": "string",
-            "metadata": {
-                "description": "The value to use for the site name."
-            }
+        "resourceGroupName": {
+            "type": "string"
         },
-        "hostingPlanName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the App Service plan to use for hosting the web app."
-            }
+        "appName": {
+            "type": "string"
         },
         "sku": {
             "type": "string",
@@ -42,10 +36,14 @@
             }
         }
     },
+    "variables": {
+        "siteName": "[concat(parameters('resourceGroupName'), '-', parameters('appName'))]",
+        "hostingPlanName": "[parameters('resourceGroupName')]"
+    },
     "resources": [
         {
             "apiVersion": "2015-08-01",
-            "name": "[parameters('hostingPlanName')]",
+            "name": "[variables('hostingPlanName')]",
             "type": "Microsoft.Web/serverfarms",
             "location": "[resourceGroup().location]",
             "sku": {
@@ -53,19 +51,19 @@
                 "capacity": "[parameters('workerSize')]"
             },
             "properties": {
-                "name": "[parameters('hostingPlanName')]"
+                "name": "[variables('hostingPlanName')]"
             }
         },
         {
             "apiVersion": "2015-08-01",
-            "name": "[parameters('siteName')]",
+            "name": "[variables('siteName')]",
             "type": "Microsoft.Web/sites",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ],
             "properties": {
-                "serverFarmId": "[parameters('hostingPlanName')]"
+                "serverFarmId": "[variables('hostingPlanName')]"
             }
         }
     ]
